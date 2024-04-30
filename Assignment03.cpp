@@ -1,241 +1,322 @@
-#include <bits/stdc++.h>
+#include <iostream>
 using namespace std;
-
-struct Node {
-	struct Node *left, *right;
-	int info;
-	bool lthread;
-	bool rthread;
+class node
+{
+    int data;
+    node *left;
+    node *right;
+    bool lthread;
+    bool rthread;
+    public:
+    node()
+    {
+        data=0;
+        left=NULL;
+        right=NULL;
+        lthread=1;
+        rthread=1;
+    }
+    friend class tbt;
 };
 
-struct Node* insert(struct Node* root, int ikey)
+class tbt
 {
-	Node* ptr = root;
-	Node* par = NULL; 
-	while (ptr != NULL) {
-		if (ikey == (ptr->info)) {
-			printf("Duplicate Key !\n");
-			return root;
-		}
+    node *root;
+    node *head;
+    public:
+    tbt()
+    {
+        root=NULL;
+        head=new node;
+    }
+    void insert(int x);
+    void inorder(node *c);
+    node *inordersucc(node *c);
+    node* get_root();
+    node* preorder(node *c);
+    void remove(int x);
+};
 
-		par = ptr; 
+//tbt functions
 
-		if (ikey < ptr->info) {
-			if (ptr->lthread == false)
-				ptr = ptr->left;
-			else
-				break;
-		}
-
-		else {
-			if (ptr->rthread == false)
-				ptr = ptr->right;
-			else
-				break;
-		}
-	}
-
-	Node* tmp = new Node;
-	tmp->info = ikey;
-	tmp->lthread = true;
-	tmp->rthread = true;
-
-	if (par == NULL) {
-		root = tmp;
-		tmp->left = NULL;
-		tmp->right = NULL;
-	}
-	else if (ikey < (par->info)) {
-		tmp->left = par->left;
-		tmp->right = par;
-		par->lthread = false;
-		par->left = tmp;
-	}
-	else {
-		tmp->left = par;
-		tmp->right = par->right;
-		par->rthread = false;
-		par->right = tmp;
-	}
-
-	return root;
+void tbt::insert(int x)
+{
+    node *new1=new node;
+    new1->data=x;
+    node *c=root;
+    node *p=root;
+    int flag=0;
+    if(root==NULL)
+    {
+        root=new1;
+        head->right=root;
+        new1->left=head;
+        new1->right=head;
+    }
+    else
+    {
+        while(flag!=1)
+    {
+        if(c->data==x)
+        {
+            return;
+        }
+        if(c->data<x)
+        {
+            
+            if(c->rthread==1)
+            {
+                new1->right=c->right;
+                new1->left=c;
+                c->right=new1;
+                c->rthread=0;
+                flag=1;
+            }
+            p=c;
+            c=c->right;
+        }
+        else if(c->data>x)
+        {
+            
+            if(c->lthread==1)
+            {
+                new1->left=c->left;
+                new1->right=c;
+                c->left=new1;
+                c->lthread=0;
+                flag=1;
+            }
+            p=c;
+            c=c->left;
+        }
+    }
+    }
+    
+    
 }
 
-struct Node* inSucc(struct Node* ptr)
+void tbt::inorder(node *c)
 {
-	if (ptr->rthread == true)
-		return ptr->right;
-
-	ptr = ptr->right;
-	while (ptr->lthread == false)
-		ptr = ptr->left;
-
-	return ptr;
+    while(c->left != head){
+        c = c->left;
+    }
+    while(c->right != head){
+        cout<<c->data<<" ";
+        c = inordersucc(c);
+    }
+    cout<<c->data<<" ";
+    
 }
 
-struct Node* inorderSuccessor(struct Node* ptr)
+node *tbt::inordersucc(node *c)
 {
-	if (ptr->rthread == true)
-		return ptr->right;
+    if(c->rthread==1)
+    {
+        return c->right;
+    }
+    else
+    {
+        c=c->right;
+        while(c->lthread!=1)
+        {
+            c=c->left;
+        }
+        return c;
 
-	ptr = ptr->right;
-	while (ptr->lthread == false)
-		ptr = ptr->left;
-	return ptr;
+    }
 }
 
-void inorder(struct Node* root)
+node* tbt::preorder(node *c)
 {
-	if (root == NULL)
-		printf("Tree is empty");
-
-	struct Node* ptr = root;
-	while (ptr->lthread == false)
-		ptr = ptr->left;
-
-	while (ptr != NULL) {
-		printf("%d ", ptr->info);
-		ptr = inorderSuccessor(ptr);
-	}
+    while(c->left!=head)
+    {
+        cout<<c->data<<" ";
+        c=c->left;
+    }
+    cout<<c->data<<" ";
+    while(c->right!=head)
+    {
+        if(c->rthread==1)
+        {
+            c=c->right;
+        }
+        else
+        {
+            c=c->right;
+            while(c->lthread!=1)
+            {
+                cout<<c->data<<" ";
+                c=c->left;
+            }
+            cout<<c->data<<" ";
+        }
+    }
 }
 
-struct Node* inPred(struct Node* ptr)
+void tbt::remove(int x)
 {
-	if (ptr->lthread == true)
-		return ptr->left;
-
-	ptr = ptr->left;
-	while (ptr->rthread == false)
-		ptr = ptr->right;
-	return ptr;
+    node *c=root;
+    node *p=root;
+    int flag=0;
+    while(flag!=1)
+    {
+        if(c->data==x)
+        {
+            flag=1;
+        }
+        if(c->data<x)
+        {
+            p=c;
+            c=c->right;
+        }
+        else if(c->data>x)
+        {
+            p=c;
+            c=c->left;
+        }
+    }
+    if(c->lthread==1 && c->rthread==1)
+    {
+        if(p->left==c)
+        {
+            p->left=c->left;
+            p->lthread=1;
+            delete(c);
+        }
+        else if(p->right==c)
+        {
+            p->right=c->right;
+            p->rthread=1;
+            delete(c);
+        }
+    }
+    else if(c->lthread==1 || c->rthread==1)
+    {
+        if(p->right==c)
+        {
+            if(c->lthread==1)
+            {
+                c->right->left=p;
+                p->right=c->right;
+                delete(c); 
+            }
+            else if(c->rthread==1)
+            {
+                c->left->right=c->right;
+                p->right=c->left;
+                delete(c);
+            }
+        }
+        else if(p->left==c)
+        {
+            if(c->lthread==1)
+            {
+                c->right->left=c->left;
+                p->left=c->right;
+                delete(c); 
+            }
+            else if(c->rthread==1)
+            {
+                c->left->right=p;
+                p->left=c->left;
+                delete(c);
+            }
+        }
+    }
+    else if(c->lthread!=1 && c->rthread!=1)
+        {
+            node *p=c;
+            node* q=inordersucc(c);
+            c=c->right;
+            while(c->left!=q && c!=q)
+            {
+                c=c->left;
+            }
+            int temp=p->data;
+            p->data=q->data;
+            q->data=temp;
+            if(c->left==q)
+            {
+                if(q->rthread!=1)
+                {
+                    // c->left=q->right;
+                    node *r=q;
+                    q=q->right;
+                    while(q->lthread!=1)
+                    {
+                        q=q->left;
+                    }
+                    q->left=r->left;
+                    c->left=r->right;
+                    delete(r);
+                }
+                else if(q->rthread==1)
+                {
+                    c->left=q->left;
+                    c->lthread=1;
+                    delete(q);
+                }
+                
+            }
+            else if(c==q)
+            {
+                if(q->rthread==1)
+                {
+                    p->right=q->right;
+                    p->rthread=1;
+                    delete(q);
+                }
+                else if(q->rthread!=1)
+                {
+                    p->right=q->right;
+                    q->right->left=q->left;
+                    delete(q);
+                }
+                
+            }
+        }
 }
-
-struct Node* caseA(struct Node* root, struct Node* par,
-				struct Node* ptr)
+node* tbt::get_root()
 {
-	if (par == NULL)
-		root = NULL;
-
-	else if (ptr == par->left) {
-		par->lthread = true;
-		par->left = ptr->left;
-	}
-	else {
-		par->rthread = true;
-		par->right = ptr->right;
-	}
-
-	free(ptr);
-	return root;
+    return root;
 }
-
-struct Node* caseB(struct Node* root, struct Node* par,
-				struct Node* ptr)
-{
-	struct Node* child;
-
-	if (ptr->lthread == false)
-		child = ptr->left;
-	else
-		child = ptr->right;
-	if (par == NULL)
-		root = child;
-	else if (ptr == par->left)
-		par->left = child;
-	else
-		par->right = child;
-
-	Node* s = inSucc(ptr);
-	Node* p = inPred(ptr);
-
-	if (ptr->lthread == false)
-		p->right = s;
-
-	else {
-		if (ptr->rthread == false)
-			s->left = p;
-	}
-
-	free(ptr);
-	return root;
-}
-
-struct Node* caseC(struct Node* root, struct Node* par,
-				struct Node* ptr)
-{
-	struct Node* parsucc = ptr;
-	struct Node* succ = ptr->right;
-
-	while (succ->lthread==false) {
-		parsucc = succ;
-		succ = succ->left;
-	}
-
-	ptr->info = succ->info;
-
-	if (succ->lthread == true && succ->rthread == true)
-		root = caseA(root, parsucc, succ);
-	else
-		root = caseB(root, parsucc, succ);
-
-	return root;
-}
-
-struct Node* delThreadedBST(struct Node* root, int dkey)
-{
-	struct Node *par = NULL, *ptr = root;
-	int found = 0;
-
-	while (ptr != NULL) {
-		if (dkey == ptr->info) {
-			found = 1;
-			break;
-		}
-		par = ptr;
-		if (dkey < ptr->info) {
-			if (ptr->lthread == false)
-				ptr = ptr->left;
-			else
-				break;
-		}
-		else {
-			if (ptr->rthread == false)
-				ptr = ptr->right;
-			else
-				break;
-		}
-	}
-
-	if (found == 0)
-		printf("dkey not present in tree\n");
-	else if (ptr->lthread == false && ptr->rthread == false)
-		root = caseC(root, par, ptr);
-	else if (ptr->lthread == false)
-		root = caseB(root, par, ptr);
-	else if (ptr->rthread == false)
-		root = caseB(root, par, ptr);
-	else
-		root = caseA(root, par, ptr);
-
-	return root;
-}
-
 int main()
 {
-	struct Node* root = NULL;
-
-	root = insert(root, 20);
-	root = insert(root, 10);
-	root = insert(root, 30);
-	root = insert(root, 5);
-	root = insert(root, 16);
-	root = insert(root, 14);
-	root = insert(root, 17);
-	root = insert(root, 13);
-	inorder(root);
-    cout<<endl;
-	root = delThreadedBST(root, 20);
-	inorder(root);
-
-	return 0;
+    tbt t;
+    int c=1;
+    while(c>0)
+    {
+        cout<<"MENU"<<endl;
+        cout<<"1.Insert"<<endl;
+        cout<<"2.Inorder"<<endl;
+        cout<<"3.Preorder"<<endl;
+        cout<<"4.Delete"<<endl;
+        cout<<"Enter Choice"<<endl;
+        cin>>c;
+        if(c==1)
+        {
+            int key;
+            cout<<"Enter data:";
+            cin>>key;
+            t.insert(key);
+        }
+        else if(c==2)
+        {
+            t.inorder(t.get_root());
+            cout<<endl;
+        }
+        else if(c==3)
+        {
+            t.preorder(t.get_root());
+            cout<<endl;
+        }
+        else if(c==4)
+        {
+            int x;
+            cout<<"Enter key to delete"<<endl;
+            cin>>x;
+            t.remove(x);
+        }
+    }
+    return 0;
 }
