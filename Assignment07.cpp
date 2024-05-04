@@ -9,7 +9,7 @@ int minimumedge(vector<int>& wt,vector<bool>& visited)
     for(int i = 0 ; i < wt.size() ; i++)
     {
         if(wt[i] < minimum && visited[i] == false)
-            minimum=wt[i]; min = i;
+            minimum=wt[i], min = i;
     }
     return min;
 }
