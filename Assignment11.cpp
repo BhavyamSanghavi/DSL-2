@@ -16,91 +16,68 @@ class student
         div=' ';
         add="";
     }
-    student(int r,string n,char d,string a)
-    {
-        roll_no=r;
-        name=n;
-        div=d;
-        add=a;
-    }
-    friend fstream &operator<<(fstream &out1,student &s);
-    friend fstream &operator>>(fstream &in1,student &s);
-    friend ostream &operator<<(ostream &out1,student &s);
-    void display(fstream &in,student &s);
-    void search(fstream &in,int x,student &s);
-    void delete1(fstream &in,int x,student &s,int n);
+    
+    void display(student &s,int n);
+    void search(int x,student &s);
+    void delete1(int x,student &s,int& n);
 };
 
-fstream &operator<<(fstream &out1,student &s)
-{
-    out1<<s.roll_no<<" ";
-    out1<<s.name<<" ";
-    out1<<s.div<<" ";
-    out1<<s.add<<" ";
-    out1<<endl;
-    return out1;
-}
 
-fstream &operator>>(fstream &in1,student &s)
+void student::display(student &s,int n)
 {
-    in1>>s.roll_no;
-    in1>>s.name;
-    in1>>s.div;
-    in1>>s.add;
-    return in1;
-}
-
-ostream &operator<<(ostream &out1,student &s)
-{
-    out1<<s.roll_no<<" ";
-    out1<<s.name<<" ";
-    out1<<s.div<<" ";
-    out1<<s.add<<" ";
-    cout<<endl;
-    return out1;
-}
-
-void student::display(fstream &in,student &s)
-{
+    fstream in;
     in.open("file1.txt",ios::in);
-    while(1)
+    for(int i=0;i<n;i++)
     {
-        in>>s;
         if(in.eof())
         {
             break;
         }
-        cout<<s;
+        in>>s.roll_no;
+        in>>s.name;
+        in>>s.div;
+        in>>s.add;
+        
+        cout<<s.roll_no<<" "<<s.name<<" "<<s.div<<" "<<s.add<<endl;
     }
     in.close();
 }
 
-void student::search(fstream &in,int x,student &s)
+void student::search(int x,student &s)
 {
+    fstream in;
     in.open("file1.txt",ios::in);
     while(1)
     {
-        in>>s;
+        in>>s.roll_no;
+        in>>s.name;
+        in>>s.div;
+        in>>s.add;
         if(s.roll_no==x)
         {
-            cout<<s;
+            cout<<s.roll_no<<" "<<s.name<<" "<<s.div<<" "<<s.add<<endl;
             break;
         }
         if(in.eof())
         {
             cout<<"Record not found"<<endl;
+            break;
         }
     }
     in.close();
 }
 
-void student::delete1(fstream &in,int x,student &s,int n)
+void student::delete1(int x,student &s,int& n)
 {
     student arr[n];
+    fstream in;
     in.open("file1.txt",ios::in);
     for(int i=0;i<n;i++)
     {
-        in>>s;
+        in>>s.roll_no;
+        in>>s.name;
+        in>>s.div;
+        in>>s.add;
         arr[i]=s;
     }
     in.close();
@@ -113,10 +90,11 @@ void student::delete1(fstream &in,int x,student &s,int n)
         }
         else
         {
-            in<<arr[i];
-            cout<<arr[i];
+            in<<arr[i].roll_no<<" "<<arr[i].name<<" "<<arr[i].div<<" "<<arr[i].add<<endl;
+            cout<<arr[i].roll_no<<" "<<arr[i].name<<" "<<arr[i].div<<" "<<arr[i].add<<endl;
         }
     }
+    n--;
     in.close();
 
 }
@@ -155,28 +133,27 @@ int main()
                 cin>>div;
                 cout<<"Enter address:";
                 cin>>add;
-                student s(roll_no,name,div,add);
-                myfile<<s;
+                myfile<<roll_no<<" "<<name<<" "<<div<<" "<<add<<endl;
             }
             myfile.close();
         }
         else if(c==2)
         {
-            s1.display(myfile,s1);
+            s1.display(s1,n);
         }
         else if(c==3)
         {
             int x;
             cout<<"Enter the roll no to search:";
             cin>>x;
-            s1.search(myfile,x,s1);
+            s1.search(x,s1);
         }
         else if(c==4)
         {
             int x;
             cout<<"Enter roll no to delete:";
             cin>>x;
-            s1.delete1(myfile,x,s1,n);
+            s1.delete1(x,s1,n);
         }
     }
     return 0;
