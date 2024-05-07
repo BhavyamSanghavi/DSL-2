@@ -46,7 +46,7 @@ void tbt::insert(int x)
     node *c=root;
     node *p=root;
     int flag=0;
-    if(root==NULL)
+    if(root==NULL)            //when no root is present
     {
         root=new1;
         head->right=root;
@@ -57,11 +57,11 @@ void tbt::insert(int x)
     {
         while(flag!=1)
     {
-        if(c->data==x)
+        if(c->data==x)        //data already exists
         {
             return;
         }
-        if(c->data<x)
+        if(c->data<x)        //insert as right child
         {
             
             if(c->rthread==1)
@@ -75,7 +75,7 @@ void tbt::insert(int x)
             p=c;
             c=c->right;
         }
-        else if(c->data>x)
+        else if(c->data>x)    //insert as left child
         {
             
             if(c->lthread==1)
@@ -158,7 +158,7 @@ void tbt::remove(int x)
     node *c=root;
     node *p=root;
     int flag=0;
-    while(flag!=1)
+    while(flag!=1)            //reach the required node
     {
         if(c->data==x)
         {
@@ -175,7 +175,7 @@ void tbt::remove(int x)
             c=c->left;
         }
     }
-    if(c->lthread==1 && c->rthread==1)
+    if(c->lthread==1 && c->rthread==1)        // when node is a leaf node (0 child)
     {
         if(p->left==c)
         {
@@ -190,32 +190,32 @@ void tbt::remove(int x)
             delete(c);
         }
     }
-    else if(c->lthread==1 || c->rthread==1)
+    else if(c->lthread==1 || c->rthread==1)        // node has 1 child
     {
-        if(p->right==c)
+        if(p->right==c)        // node is at right of parent
         {
-            if(c->lthread==1)
+            if(c->lthread==1)        // node has a right child
             {
                 c->right->left=p;
                 p->right=c->right;
                 delete(c); 
             }
-            else if(c->rthread==1)
+            else if(c->rthread==1)       //node has a left child
             {
                 c->left->right=c->right;
                 p->right=c->left;
                 delete(c);
             }
         }
-        else if(p->left==c)
+        else if(p->left==c)        //node is at left of parent
         {
-            if(c->lthread==1)
+            if(c->lthread==1)        // node has a right child
             {
                 c->right->left=c->left;
                 p->left=c->right;
                 delete(c); 
             }
-            else if(c->rthread==1)
+            else if(c->rthread==1)       //node has a left child
             {
                 c->left->right=p;
                 p->left=c->left;
@@ -223,58 +223,31 @@ void tbt::remove(int x)
             }
         }
     }
-    else if(c->lthread!=1 && c->rthread!=1)
+    else if(c->lthread!=1 && c->rthread!=1)        // node with 2 children
+    {
+        node *p=c;
+        node* q=inordersucc(c);
+        c=c->right;
+        while(c!=q)
         {
-            node *p=c;
-            node* q=inordersucc(c);
-            c=c->right;
-            while(c->left!=q && c!=q)
-            {
-                c=c->left;
-            }
-            int temp=p->data;
-            p->data=q->data;
-            q->data=temp;
-            if(c->left==q)
-            {
-                if(q->rthread!=1)
-                {
-                    // c->left=q->right;
-                    node *r=q;
-                    q=q->right;
-                    while(q->lthread!=1)
-                    {
-                        q=q->left;
-                    }
-                    q->left=r->left;
-                    c->left=r->right;
-                    delete(r);
-                }
-                else if(q->rthread==1)
-                {
-                    c->left=q->left;
-                    c->lthread=1;
-                    delete(q);
-                }
-                
-            }
-            else if(c==q)
-            {
-                if(q->rthread==1)
-                {
-                    p->right=q->right;
-                    p->rthread=1;
-                    delete(q);
-                }
-                else if(q->rthread!=1)
-                {
-                    p->right=q->right;
-                    q->right->left=q->left;
-                    delete(q);
-                }
-                
-            }
+            c=c->left;
         }
+        int temp=p->data;
+        p->data=q->data;
+        q->data=temp;
+        if(q->rthread==1)        // successor node has no right sub-tree
+        {
+            p->right=q->right;
+            p->rthread=1;
+            delete(q);
+        }
+        else if(q->rthread!=1)    // successor node has right sub-tree
+        {
+            p->right=q->right;
+            q->right->left=q->left;
+            delete(q);
+        }  
+    }
 }
 node* tbt::get_root()
 {
