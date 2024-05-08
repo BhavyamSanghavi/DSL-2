@@ -41,7 +41,7 @@ void obst::input_prob()
 }
 void obst::initialize()
 {
-    for(int i=0;i<n;i++)
+    for(int i=0;i<=n;i++)
     {
         c[i][i]=0.0;
         r[i][i]=0;
@@ -50,9 +50,6 @@ void obst::initialize()
         c[i][i+1]=b[i]+b[i+1]+a[i+1];
         r[i][i+1]=i+1;
     }
-    c[n][n]=0.0;
-    r[n][n]=0;
-    wt[n][n]=b[n];
 }
 
 void obst::con_obst()
