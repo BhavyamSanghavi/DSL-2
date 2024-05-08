@@ -1,83 +1,115 @@
-#include<bits/stdc++.h>
+#include <iostream>
 using namespace std;
-
-struct TreeNode {
-    int key;
-    TreeNode* left;
-    TreeNode* right;
-    TreeNode(int k) : key(k), left(nullptr), right(nullptr) {}
+class obst
+{
+    float a[20],b[20],wt[20][20],c[20][20];
+    int r[20][20],n;
+    int num[20];
+    public:
+    obst(int x)
+    {
+        n=x;
+    }
+    void input_prob();
+    void initialize();
+    void con_obst();
+    void display();
+    void print(int l1,int r1);
 };
 
-// Function to build optimal BST recursively
-TreeNode* constructTree(vector<int>& keys, vector<vector<int>>& root, int i, int j) {
-    if (i > j) return nullptr;
-    int rootIndex = root[i][j];
-    TreeNode* rootNode = new TreeNode(keys[rootIndex]);
-    rootNode->left = constructTree(keys, root, i, rootIndex - 1);
-    rootNode->right = constructTree(keys, root, rootIndex + 1, j);
-    return rootNode;
+//obst functions
+
+void obst::input_prob()
+{
+    cout<<"Enter Keys:"<<endl;
+    for(int i=1;i<=n;i++)
+    {
+        cout<<"Key="; cin>>num[i];
+    }
+    cout<<"Enter the probabilities for successful search:"<<endl;
+    for(int i=1;i<=n;i++)
+    {
+        cout<<"p["<<i<<"]"<<"=";
+        cin>>a[i];
+    }
+    cout<<"Enter the probabilities for unsuccessful search:"<<endl;
+    for(int i=0;i<=n;i++)
+    {
+        cout<<"q["<<i<<"]"<<"=";
+        cin>>b[i];
+    }
+}
+void obst::initialize()
+{
+    for(int i=0;i<n;i++)
+    {
+        c[i][i]=0.0;
+        r[i][i]=0;
+        wt[i][i]=b[i];
+        wt[i][i+1]=b[i]+b[i+1]+a[i+1];
+        c[i][i+1]=b[i]+b[i+1]+a[i+1];
+        r[i][i+1]=i+1;
+    }
+    c[n][n]=0.0;
+    r[n][n]=0;
+    wt[n][n]=b[n];
 }
 
-// Function to build optimal BST recursively
-TreeNode* buildOptimalBSTRecursive(vector<int>& keys, vector<int>& freq, int i, int j) {
-    if (i > j) return nullptr;
-
-    int minCost = INT_MAX;
-    int rootIndex = -1;
-
-    int freqSum = 0;
-    for (int k = i; k <= j; ++k) {
-        freqSum += freq[k];
-    }
-
-    for (int r = i; r <= j; ++r) {
-        int leftCost = (r > i) ? buildOptimalBSTRecursive(keys, freq, i, r - 1)->key : 0;
-        int rightCost = (r < j) ? buildOptimalBSTRecursive(keys, freq, r + 1, j)->key : 0;
-
-        int totalCost = freqSum + leftCost + rightCost;
-
-        if (totalCost < minCost) {
-            minCost = totalCost;
-            rootIndex = r;
+void obst::con_obst()
+{
+    for(int i=2;i<=n;i++)
+    {
+        for(int j=0;j<=n-i;j++)
+        {
+            wt[j][j+i]=b[j+i]+a[j+i]+wt[j][j+i-1];
+            c[j][j+i]=9999;
+            for(int k=j+1;k<=j+i;k++)
+            {
+                if(c[j][j+i]>(c[j][k-1]+c[k][j+i]))
+                {
+                    c[j][j+i]=c[j][k-1]+c[k][j+i];
+                    r[j][j+i]=k;
+                }
+            }
+            c[j][j+i]+=wt[j][j+i];
         }
     }
-
-    TreeNode* root = new TreeNode(keys[rootIndex]);
-    root->left = buildOptimalBSTRecursive(keys, freq, i, rootIndex - 1);
-    root->right = buildOptimalBSTRecursive(keys, freq, rootIndex + 1, j);
-
-    return root;
 }
 
-// Function to build optimal BST
-TreeNode* buildOptimalBST(vector<int>& keys, vector<int>& freq) {
-    int n = keys.size();
-    vector<vector<int>> root(n, vector<int>(n, 0));
+void obst::display()
+{
+    cout<<"Weight Matrix"<<endl;
+    cout<<wt[0][n]<<endl;
+    cout<<"Cost Matrix"<<endl;
+    cout<<c[0][n]<<endl;
+    cout<<"Row Matrix"<<endl;
+    cout<<r[0][n]<<endl;
+}
 
-    for (int i = 0; i < n; ++i) {
-        root[i][i] = i;
+void obst::print(int l1,int r1)
+{
+    if(l1>=r1)
+    {
+        return;
     }
-
-    return buildOptimalBSTRecursive(keys, freq, 0, n - 1);
+    if(r[l1][r[l1][r1]-1]!=0)
+		cout<<"\n Left child of "<<num[r[l1][r1]]<<" :: "<<num[r[l1][r[l1][r1]-1]];
+	if(r[r[l1][r1]][r1]!=0)
+		cout<<"\n Right child of "<<num[r[l1][r1]]<<" :: "<<num[r[r[l1][r1]][r1]];
+	print(l1,r[l1][r1]-1);
+	print(r[l1][r1],r1);
 }
 
-// Function to perform inorder traversal of BST
-void inorderTraversal(TreeNode* root) {
-    if (root) {
-        inorderTraversal(root->left);
-        cout << root->key << " ";
-        inorderTraversal(root->right);
-    }
-}
-
-int main() {
-    vector<int> keys = {10, 12, 20, 24};
-    vector<int> freq = {34, 8, 50, 12};
-    TreeNode* root = buildOptimalBST(keys, freq);
-
-    cout << "Inorder traversal of constructed BST:" << endl;
-    inorderTraversal(root);
-    cout << endl;
-
+int main()
+{
+    int x;
+    cout<<"Enter number of nodes:";
+    cin>>x;
+    obst o(x);
+    o.input_prob();
+    o.initialize();
+    o.con_obst();
+    o.display();
+    o.print(0,x);
     return 0;
 }
