@@ -227,14 +227,7 @@ void tbt::remove(int x)
     {
         node *p=c;
         node* q=inordersucc(c);
-        c=c->right;
-        while(c!=q)
-        {
-            c=c->left;
-        }
-        int temp=p->data;
-        p->data=q->data;
-        q->data=temp;
+        swap(q->data,p->data);
         if(q->rthread==1)        // successor node has no right sub-tree
         {
             p->right=q->right;
