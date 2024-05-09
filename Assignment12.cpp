@@ -1,134 +1,196 @@
-
-#include<iostream>
-#include<fstream>
-#include<iomanip>
-#include<vector>
+#include <iostream>
+#include <fstream>
 using namespace std;
 
-void addEmployee(){
-    ofstream f("db.txt", ios::app);
+class Entry
+{
+    int rollNo, loc;
 
-    string employee_id, name, educataion, salary;
+public:
+    Entry()
+    {
+        rollNo = -1;
+        loc = -1;
+    }
+    friend class Hash;
+};
 
-    cout<<"--- ADD Employee IN DATABASE ---"<<endl;
+class Hash
+{
+    Entry arr[10];
+    int size;
 
-    cout<<"Enter Employee ID : ";
-    cin>>employee_id;
-    cout<<"\nEnter Employee Name : ";
-    cin>>name;
-    cout<<"\nEnter Employee Designamtion : ";
-    cin>>educataion;
-    cout<<"\nEnter Employee Salary : ";
-    cin>>salary;
-    cout<<endl;
-
-    f<<left<<setw(20)<<employee_id<<setw(20)<<name <<setw(20)<< educataion <<setw(20)<<salary<<endl;
-    cout<<"Employee Added Successfully.\n";
-    f.close();
-
-}
-
-void deleteEmployee() {
-    ifstream inputFile("db.txt");
-    string line;
-    string employee_id;
-    cout << "Enter Employee ID To Delete: ";
-    cin >> employee_id;
-
-    vector<string> fileLines;
-    while (getline(inputFile, line)) {
-        if (line.substr(0, line.find(' ')) != employee_id) {
-            fileLines.push_back(line);
+public:
+    Hash()
+    {
+        size = 10;
+        for (int i = 0; i < size; i++)
+        {
+            arr[i] = Entry();
+        }
+    }
+    void insert(int rollNo, int loc)
+    {
+        int index = rollNo % 10;
+        if (arr[index].rollNo == -1)
+        {
+            arr[index].rollNo = rollNo;
+            arr[index].loc = loc;
+        }
+        else
+        {
+            int i = 1;
+            while (i < 10)
+            {
+                if (arr[(index + i) % 10].rollNo == -1)
+                {
+                    arr[(index + i) % 10].rollNo = rollNo;
+                    arr[(index + i) % 10].loc = loc;
+                    break;
+                }
+                i++;
+            }
         }
     }
 
-    inputFile.close();
-
-    ofstream outputFile("db.txt", ios::out | ios::trunc);
-    for (size_t i = 0; i < fileLines.size(); ++i) {
-        outputFile << fileLines[i] << endl;
-    }
-
-    outputFile.close();
-}
-
-void searchEmployee(){
-    ifstream f("db.txt");
-    string line;
-    string employee_id;
-    cout<<"Enter Employee ID To Search : ";
-    cin>>employee_id;
-
-
-    bool found = false;
-
-    while(getline(f,line)){
-        if(line.find(employee_id) != string::npos){
-            cout<<"Employee Details: "<<endl;
-            cout<<"\n"<<line <<endl;
-            found =true;
-            break;
+    void printHashTable()
+    {
+        cout << endl
+             << endl;
+        for (int i = 0; i < size; i++)
+        {
+            if (arr[i].rollNo != -1)
+            {
+                cout << arr[i].rollNo << "  " << arr[i].loc << " at index: " << i << endl;
+            }
         }
     }
-    f.close();
 
-    if(!found){
-        cout<<"Sorry, Not found"<<endl;
+    int find(int roll)
+    {
+        int index = roll % 10;
+        if (arr[index].rollNo == roll)
+        {
+            cout << "\nFound at loc: " << arr[index].loc << " && index " << index << endl;
+            return arr[index].loc;
+        }
+        else
+        {
+            int i = 1;
+            while (i < 10)
+            {
+                if (arr[(index + i) % 10].rollNo == roll)
+                {
+                    cout << "\nFound at loc: " << arr[(index + i) % 10].loc << " && index " << (index + i) % 10 << endl;
+                    return arr[(index + i) % 10].loc;
+                }
+                i++;
+            }
+        }
+        cout << "\n Not Found \n";
+        return -1;
     }
 
-}
+    friend class Student;
+};
 
-void displayData(){
-    ifstream f("db.txt");
-    string line;
-    cout<<"\nDisplaying Data :- "<<endl;
-    while(getline(f,line)){
-        cout<<"\n"<<line<<endl;
+class Student
+{
+    int rollNo;
+    string name;
+
+public:
+    Student()
+    {
+        rollNo = 0;
+        name = "";
     }
-    f.close();
-}
+    Student(int rollNo, string name)
+    {
+        this->name = name;
+        this->rollNo = rollNo;
+    }
+    void insertInFile(Hash &obj)
+    {
+        int rollNo;
+        cout << "\nEnter Roll No: ";
+        cin >> rollNo;
+        string name;
+        cout << "Enter name: ";
+        cin >> name;
+        Student s(rollNo, name);
+        fstream f;
+        f.open("Records-DAF.txt", ios::app);
+        f.seekp(0, ios::end);
+        int loc = f.tellp();
+        f << s.rollNo << "  " << s.name << endl;
+        obj.insert(rollNo, loc);
+        cout << "Inserted at " << loc << "  " << f.tellp();
+        f.close();
+    }
 
-int main(){
+    void searchInFile(Hash &obj)
+    {
+        cout << "\nRoll No to be searched: ";
+        int rollNo;
+        cin >> rollNo;
+        int loc = obj.find(rollNo);
+        if (loc == -1)
+            return;
+        fstream f;
+        f.open("Records-DAF.txt", ios::in);
+        f.seekg(loc, ios::beg);
+        Student s;
+        f >> s.rollNo >> s.name;
+        cout << s.rollNo << "  " << s.name << endl;
+    }
 
+    void deleteFromFile(Hash &obj)
+    {
+        cout << "\nRoll No to be deleted: ";
+        int rollNo;
+        cin >> rollNo;
 
-    ofstream f("db.txt", ios::out);
-    f<<left<<setw(20) << "Employee ID" << setw(20) << "Name" << setw(20) << "educataion" << setw(20) <<"salary"<<endl;
-    f.close();
-
-    int choice;
-    while(choice != -1){
-        cout<<"\n--------- M E N U -----------"<<endl;
-        cout<<"1. Add Employee."; 
-        cout<<"\n2. Delete Employee.";
-        cout<<"\n3. Search Employee. ";
-        cout<<"\n4. Display Data.";
-        cout<<"\n5. Exit. "<<endl;
-        cout<<"-------------------------------"<<endl;
-        cout<<"Enter Your Choice: ";
-        cin>>choice;
-        cout<<endl;
-
-        switch(choice){
-            case 1:
-                addEmployee();
+        fstream f;
+        f.open("Records-DAF.txt", ios::in);
+        Student s[10];
+        int i = 0;
+        while (i < 10)
+        {
+            f >> s[i].rollNo >> s[i].name;
+            if (f.eof())
                 break;
-            case 2:
-                deleteEmployee();
-                break;
-            case 3:
-                searchEmployee();
-                break;
-            case 4:
-
-                displayData();
-                break;
-            case 5:
-                return 0;
-                break;
-            default:
-                cout<<"Please ReEnter Your Choice: ";
-                break;
+            if (s[i].rollNo != rollNo)
+                i++;
+        }
+        f.close();
+        cout << endl;
+        f.open("Records-DAF.txt", ios::out);
+        Hash newTable;
+        for (int loop = 0; loop < i; loop++)
+        {
+            cout << s[loop].rollNo << "  " << s[loop].name << endl;
+            f.seekp(0, ios::end);
+            int loc = f.tellp();
+            f << s[loop].rollNo << "  " << s[loop].name << endl;
+            newTable.insert(s[loop].rollNo, loc);
         }
 
+        obj = newTable;
     }
+};
+
+int main()
+{
+    Student stud;
+    Hash table;
+    stud.insertInFile(table);
+    stud.insertInFile(table);
+    stud.insertInFile(table);
+    table.printHashTable();
+    stud.deleteFromFile(table);
+    table.printHashTable();
+    stud.deleteFromFile(table);
+    table.printHashTable();
+    stud.searchInFile(table);
 }
